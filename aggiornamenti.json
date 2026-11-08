@@ -1,0 +1,22 @@
+{
+  "edizione": "novembre 2026",
+  "ultimo_controllo": "2026-11-08",
+  "voci": [
+    {
+      "id": "2026-11-ed",
+      "data": "2026-11-08",
+      "volume": [1, 2],
+      "tipo": "novita",
+      "titolo": "Edizione di novembre 2026",
+      "testo": "Questa edizione è allineata al decreto dirigenziale n. 199 del 22 aprile 2026 sulla patente D1, all’elenco dei quiz in vigore e alle durate del certificato di sicurezza pubblicate dalla Guardia Costiera. Se il tuo libro riporta «aggiornata a novembre 2026», non devi correggere nulla."
+    },
+    {
+      "id": "2026-11-carta",
+      "data": "2026-11-08",
+      "volume": [1, 2],
+      "tipo": "novita",
+      "titolo": "Carta didattica in formato A4",
+      "testo": "La carta usata nelle simulazioni di carteggio dei due volumi è scaricabile qui sotto, con le soluzioni tracciate. Stampala al 100% su A4 orizzontale."
+    }
+  ]
+}
