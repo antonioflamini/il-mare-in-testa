@@ -5,19 +5,25 @@
     {
       "id": "2026-11-quiz-dotazioni",
       "data": "2026-11-14",
-      "volume": [1, 2],
+      "volume": [
+        1,
+        2
+      ],
       "tipo": "norma",
-      "capitolo": "Cap. 14 e scheda «Dotazioni di sicurezza»",
-      "titolo": "Dotazioni di sicurezza: il libro segue la norma in vigore, alcuni quiz no",
-      "testo": "Il libro riporta la tabella delle dotazioni del D.M. 133/2024, in vigore dal 21 ottobre 2024: per esempio entro 50 miglia 2 fuochi a mano e 2 razzi a paracadute, senza limiti 3 e 3. Alcune domande dell’elenco ministeriale dei quiz, scritto nel 2022, riportano ancora i valori della tabella precedente (entro 50 miglia 3 e 3, senza limiti 4 e 4). Nel simulatore queste domande sono segnalate con una nota.",
-      "correzione": "Il libro non va corretto. Se in un quiz trovi i valori vecchi, all’esame conta la risposta del quiz ministeriale; a bordo vale la tabella del libro.",
+      "titolo": "Dotazioni di sicurezza: il libro segue la norma in vigore",
+      "testo": "Il libro riporta la tabella delle dotazioni del D.M. 133/2024, in vigore dal 21 ottobre 2024: per esempio entro 50 miglia 2 fuochi a mano e 2 razzi a paracadute, senza limiti 3 e 3. L’elenco ministeriale dei quiz è del 2022 e alcune domande riportano ancora i valori della tabella precedente. Con la circolare del 15 novembre 2024 il Ministero ha escluso dall’estrazione d’esame 37 quesiti non più conformi: nel simulatore sono segnalati e non entrano nelle simulazioni.",
+      "correzione": "Niente da correggere: studia la tabella del libro (Volume I, capitolo 14 e scheda finale).",
       "fonte": "Il Mare in Testa · Simulatore",
-      "fonte_url": "https://antonioflamini.github.io/il-mare-in-testa-simulatore/"
+      "fonte_url": "https://antonioflamini.github.io/il-mare-in-testa-simulatore/",
+      "capitolo": "Cap. 14 e scheda «Dotazioni di sicurezza»"
     },
     {
       "id": "2026-11-simulatore",
       "data": "2026-11-14",
-      "volume": [1, 2],
+      "volume": [
+        1,
+        2
+      ],
       "tipo": "novita",
       "titolo": "Il simulatore dei quiz ministeriali",
       "testo": "Tutte le domande ufficiali per la patente entro 12 miglia, senza limiti, vela e D1, con la spiegazione di ogni risposta e il rimando al capitolo del manuale. Lo trovi anche nel riquadro qui sotto.",
@@ -27,7 +33,10 @@
     {
       "id": "2026-11-ed",
       "data": "2026-11-08",
-      "volume": [1, 2],
+      "volume": [
+        1,
+        2
+      ],
       "tipo": "novita",
       "titolo": "Edizione di novembre 2026",
       "testo": "Questa edizione è allineata al decreto dirigenziale n. 199 del 22 aprile 2026 sulla patente D1, all’elenco dei quiz in vigore e alle durate del certificato di sicurezza pubblicate dalla Guardia Costiera. Se il tuo libro riporta «aggiornata a novembre 2026», non devi correggere nulla."
@@ -35,7 +44,10 @@
     {
       "id": "2026-11-carta",
       "data": "2026-11-08",
-      "volume": [1, 2],
+      "volume": [
+        1,
+        2
+      ],
       "tipo": "novita",
       "titolo": "Carta didattica in formato A4",
       "testo": "La carta usata nelle simulazioni di carteggio dei due volumi è scaricabile qui sotto, con le soluzioni tracciate. Stampala al 100% su A4 orizzontale."
