@@ -172,7 +172,10 @@
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(function (d) {
       state.data = d;
-      meta.textContent = 'Edizione di riferimento: ' + (d.edizione || '—') + ' · Ultimo controllo delle fonti ufficiali: ' + fmtDate(d.ultimo_controllo) + '.';
+      var last = (d.voci || []).map(function (v) { return v.data || ''; }).sort().pop();
+      meta.textContent = 'Edizione di riferimento: ' + (d.edizione || '—') +
+        (last ? ' · Ultimo aggiornamento: ' + fmtDate(last) : '') +
+        ' · Ultimo controllo delle fonti ufficiali: ' + fmtDate(d.ultimo_controllo) + ' (controllo automatico ogni lunedì).';
       render();
     })
     .catch(function () { meta.textContent = 'Non riesco a caricare gli aggiornamenti in questo momento. Riprova tra poco.'; });
