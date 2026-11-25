@@ -1,0 +1,131 @@
+name: Controllo settimanale delle norme
+
+# Ogni lunedì controlla le fonti sulle patenti nautiche.
+# - Aggiorna «ultimo_controllo» in aggiornamenti.json: la pagina mostra la data da sola.
+# - Se trova provvedimenti o notizie nuove apre una segnalazione (issue): GitHub la manda per e-mail.
+
+on:
+  schedule:
+    - cron: "23 6 * * 1"   # lunedì, 7:23 ora italiana (8:23 con l'ora legale)
+  workflow_dispatch:
+    inputs:
+      prova:
+        description: "Manda anche una segnalazione di prova (per controllare che l'e-mail arrivi)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  controllo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Raccogli le fonti
+        id: fonti
+        run: |
+          mkdir -p controllo
+          : > controllo/nuovo.txt
+          ok=0
+          # 1) pagina normativa del Ministero (a volte blocca le richieste automatiche)
+          if curl -sSL --retry 3 --max-time 60 -A "Mozilla/5.0" \
+               "https://www.mit.gov.it/temi/patenti-mezzi-abilitazioni/patenti-nautiche/normativa" -o mit.html \
+             && grep -qi "patent" mit.html; then
+            ok=1
+            grep -oiE 'href="[^"]+\.pdf"' mit.html | sed -E 's/^href="//I; s/"$//' | sed 's/^/MIT: /' >> controllo/nuovo.txt || true
+          fi
+          # 2) notizie degli ultimi 10 giorni su decreti, circolari, quiz e dotazioni
+          if curl -sSL --retry 3 --max-time 60 -A "Mozilla/5.0" \
+               "https://news.google.com/rss/search?q=%22patente+nautica%22+(decreto+OR+circolare+OR+quiz+OR+D1+OR+D2+OR+dotazioni+OR+regolamento)+when:10d&hl=it&gl=IT&ceid=IT:it" -o notizie.xml \
+             && grep -q "<rss" notizie.xml; then
+            ok=1
+            python3 - <<'PY' >> controllo/nuovo.txt
+          import re, html
+          x = open('notizie.xml', encoding='utf-8', errors='ignore').read()
+          for it in re.findall(r'<item>(.*?)</item>', x, re.S):
+              t = re.search(r'<title>(.*?)</title>', it, re.S)
+              l = re.search(r'<link>(.*?)</link>', it, re.S)
+              if not t:
+                  continue
+              t = html.unescape(t.group(1)).strip()
+              if re.search(r'decret|circolar|minister|quiz|esam|D1|D2|dotazion|regolament|motorizzazion|capitaneri|guardia costiera', t, re.I):
+                  print('NOTIZIA: ' + t + ' | ' + (l.group(1).strip() if l else ''))
+          PY
+          fi
+          sort -u controllo/nuovo.txt -o controllo/nuovo.txt
+          echo "ok=$ok" >> "$GITHUB_OUTPUT"
+          echo "Righe raccolte: $(wc -l < controllo/nuovo.txt)"
+
+      - name: Confronta con il controllo precedente
+        id: diff
+        if: steps.fonti.outputs.ok == '1'
+        run: |
+          touch controllo/elenco.txt
+          if [ -s controllo/elenco.txt ]; then
+            # le notizie si confrontano solo per titolo (il link cambia)
+            cut -d'|' -f1 controllo/elenco.txt | sed 's/ *$//' | sort -u > vecchi.txt
+            while IFS= read -r riga; do
+              chiave=$(printf '%s' "$riga" | cut -d'|' -f1 | sed 's/ *$//')
+              grep -qxF "$chiave" vecchi.txt || printf '%s\n' "$riga"
+            done < controllo/nuovo.txt | head -40 > controllo/novita.txt
+          else
+            : > controllo/novita.txt   # primo giro: registra soltanto
+          fi
+          cat controllo/elenco.txt controllo/nuovo.txt | sort -u > tmp.txt && mv tmp.txt controllo/elenco.txt
+          if [ -s controllo/novita.txt ]; then echo "stato=cambiato" >> "$GITHUB_OUTPUT"; else echo "stato=uguale" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Aggiorna la data dell'ultimo controllo
+        if: steps.fonti.outputs.ok == '1'
+        run: |
+          python3 - <<'PY'
+          import json, datetime
+          p = 'aggiornamenti.json'
+          d = json.load(open(p, encoding='utf-8'))
+          d['ultimo_controllo'] = datetime.date.today().isoformat()
+          open(p, 'w', encoding='utf-8').write(json.dumps(d, ensure_ascii=False, indent=2) + '\n')
+          PY
+
+      - name: Segnalazione con le novità
+        if: steps.diff.outputs.stato == 'cambiato'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          {
+            echo "Il controllo settimanale ha trovato novità da guardare per **Il Mare in Testa**:"
+            echo
+            sed -E 's/^/- /' controllo/novita.txt
+            echo
+            echo "Che cosa fare:"
+            echo "1. Apri le voci e verifica se toccano i libri (esame, quiz, dotazioni, patenti, documenti) o il simulatore."
+            echo "2. Se sì, aggiungi una voce in \`aggiornamenti.json\`: comparirà da sola sulla pagina e la data «Ultimo aggiornamento» si aggiornerà."
+            echo "3. Se non riguardano i libri, chiudi questa segnalazione."
+          } > corpo.md
+          gh issue create --title "Il Mare in Testa: possibili aggiornamenti ($(date +%d/%m/%Y))" --body-file corpo.md
+
+      - name: Avvisa se nessuna fonte risponde
+        if: steps.fonti.outputs.ok != '1'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --title "Il Mare in Testa: controllo non riuscito ($(date +%d/%m/%Y))" \
+            --body "Il controllo automatico non è riuscito a leggere né la pagina del Ministero né le notizie. La data dell'ultimo controllo non è stata cambiata. Verifica a mano su mit.gov.it oppure aspetta il prossimo lunedì."
+
+      - name: Segnalazione di prova
+        if: inputs.prova
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --title "Il Mare in Testa: prova dell'avviso via e-mail" \
+            --body "Se hai ricevuto questa e-mail, gli avvisi del controllo settimanale funzionano. Puoi chiudere questa segnalazione."
+
+      - name: Salva
+        if: steps.fonti.outputs.ok == '1'
+        run: |
+          git config user.name "controllo-settimanale"
+          git config user.email "actions@users.noreply.github.com"
+          git add controllo/elenco.txt aggiornamenti.json
+          git diff --cached --quiet || git commit -m "Controllo settimanale: $(date +%Y-%m-%d)"
+          git push
